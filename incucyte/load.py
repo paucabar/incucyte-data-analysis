@@ -171,6 +171,16 @@ def load_cellprofiler(path: str) -> pd.DataFrame:
     -------
     DataFrame with unified metadata columns and all CellProfiler measurement
     columns preserved.
+
+    Note
+    ----
+    This loader expects metadata columns written by the standard Incucyte
+    filename pattern (``Metadata_Well``, ``Metadata_Day``, etc.). Operetta/
+    PerkinElmer images processed through CellProfiler use a different filename
+    convention (``r01c01f01p01-ch1sk1fk1fl1.tiff``) that produces different
+    ``Metadata_*`` columns. When Operetta+CellProfiler data becomes available,
+    an extended loader or an additional regex in ``_parse_filename`` will be
+    needed to handle that case.
     """
     df = pd.read_csv(path)
     rename = {
