@@ -2,14 +2,27 @@
 
 Python package and Jupyter notebook templates for analysing Incucyte live-cell imaging data exported from QuPath or CellProfiler.
 
-## Installation
+## Environment setup
+
+A conda environment file is provided. Run the following from the repository root, with conda available:
 
 ```bash
+# 1. Create the environment
+conda env create -f environment.yml
+
+# 2. Activate it
+conda activate hcs-analysis
+
+# 3. Install the package in editable mode
 pip install -e .
+
+# 4. Register the Jupyter kernel
+python -m ipykernel install --user --name hcs-analysis --display-name "Python (hcs-analysis)"
 ```
 
-Dependencies: `pandas`, `numpy`, `matplotlib`, `seaborn`.  
-Optional: `PyComplexHeatmap` for enhanced heatmap plots (`metric_heatmap`).
+After step 4 the environment appears as **Python (hcs-analysis)** in Jupyter's kernel selector.
+
+> `PyComplexHeatmap` (used by `metric_heatmap`) is included via pip. If installation fails on your platform, remove it from `environment.yml` — the function will fall back to a seaborn clustermap automatically.
 
 ## Package — `incucyte`
 

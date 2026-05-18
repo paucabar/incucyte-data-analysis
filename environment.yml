@@ -1,0 +1,19 @@
+name: hcs-analysis
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pandas
+  - numpy
+  - matplotlib
+  - seaborn
+  - scipy
+  - scikit-learn
+  - joblib
+  - statsmodels
+  - scanpy        # brings umap-learn, anndata, numba as transitive deps
+  - ipykernel
+  - pip
+  - pip:
+    - PyComplexHeatmap
