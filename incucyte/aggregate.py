@@ -136,3 +136,42 @@ def class_proportions(
         pivot = pivot.merge(totals, on=keys)
 
     return pivot
+
+
+def normalize(
+    df: pd.DataFrame,
+    feature_cols: list[str],
+    control_label: str,
+    condition_col: str = "condition",
+) -> pd.DataFrame:
+    """Z-score each feature relative to the control distribution.
+
+    For each feature, subtracts the control-well mean and divides by the
+    control-well standard deviation. All conditions are expressed as deviations
+    from the control. Features where control std ≈ 0 are mean-subtracted only.
+
+    Parameters
+    ----------
+    df:
+        Per-well DataFrame with condition and feature columns.
+    feature_cols:
+        Columns to normalize.
+    control_label:
+        Value in condition_col that identifies the control wells.
+    condition_col:
+        Column identifying experimental condition (default "condition").
+
+    Returns
+    -------
+    Copy of df with feature columns replaced by normalized values.
+    """
+    df = df.copy()
+    ctrl_mask = df[condition_col] == control_label
+    ctrl_mean = df.loc[ctrl_mask, feature_cols].mean()
+    ctrl_std  = df.loc[ctrl_mask, feature_cols].std(ddof=1)
+
+    for c in feature_cols:
+        mu, sigma = ctrl_mean[c], ctrl_std[c]
+        df[c] = (df[c] - mu) / sigma if sigma > 1e-10 else df[c] - mu
+
+    return df
