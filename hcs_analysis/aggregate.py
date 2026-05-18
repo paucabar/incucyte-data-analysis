@@ -35,11 +35,11 @@ def _well_keys(df: pd.DataFrame) -> list[str]:
     return _time_keys(df, keys)
 
 
-def to_well_means(df: pd.DataFrame, metrics: list[str]) -> pd.DataFrame:
-    """Aggregate per-object measurements to per-well means.
+def to_well_means(df: pd.DataFrame, metrics: list[str], agg: str = "mean") -> pd.DataFrame:
+    """Aggregate per-object measurements to per-well summary values.
 
     Groups by (PlateID, Well, sample, condition, replicate) plus elapsed_min
-    if present, then computes the mean of each requested metric column.
+    if present, then applies the requested aggregation to each metric column.
 
     Parameters
     ----------
@@ -47,17 +47,30 @@ def to_well_means(df: pd.DataFrame, metrics: list[str]) -> pd.DataFrame:
         Per-object DataFrame with plate map columns merged.
     metrics:
         Measurement columns to aggregate (e.g. ["Circularity", "Area px^2"]).
+    agg:
+        Aggregation function name (default "mean"). Pass "median" for
+        robustness to segmentation outliers; any pandas GroupBy method name
+        is accepted.
 
     Returns
     -------
-    One row per (well [, elapsed_min]) with mean values and an object_count
-    column recording how many objects were averaged.
+    One row per (well [, elapsed_min]) with aggregated values and an
+    object_count column recording how many objects were aggregated.
     """
     keys = _well_keys(df)
     grouped = df.groupby(keys)
-    result = grouped[metrics].mean()
+    result = getattr(grouped[metrics], agg)()
     result["object_count"] = grouped.size()
     return result.reset_index()
+
+
+def to_well_medians(df: pd.DataFrame, metrics: list[str]) -> pd.DataFrame:
+    """Aggregate per-object measurements to per-well medians.
+
+    Median is preferred over mean for robustness to segmentation outliers in
+    CellProfiler data. See to_well_means for parameter and return documentation.
+    """
+    return to_well_means(df, metrics, agg="median")
 
 
 def to_replicate_means(df: pd.DataFrame, metrics: list[str] | None = None) -> pd.DataFrame:
